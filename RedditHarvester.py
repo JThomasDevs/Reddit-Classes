@@ -180,10 +180,6 @@ class RedditHarvester:
         post.top_comments = comment_objs
         return comment_objs
 
-    def harvest_n_comments(self, post: Post, n: int = 50):
-        #TODO: Write function to harvest n comments from a post
-        pass
-
     def write_posts(self, posts: list[Post], path: str = '.'):
         for post in posts:
             post_id = post.id
