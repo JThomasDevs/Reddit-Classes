@@ -1,0 +1,7 @@
+To build the reddit_classes package and install locally:
+
+cd notebooks/reddit_classes
+
+python -m build
+
+pip install .
