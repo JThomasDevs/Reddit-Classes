@@ -67,6 +67,7 @@ class RedditHarvester:
     def gather_threshold_posts(self, threshold: int = 1000, close_on_finish: bool = True) -> list[Post]:
         url = f'https://www.reddit.com/r/{self.target}/top/?t={self.timeframe}'
         page = ChromiumPage()
+        page.set.window.mini()
         print('Browser started')
         page.get(url)
         print('Page loaded\n')
@@ -117,6 +118,14 @@ class RedditHarvester:
         page.get(url)
         page.wait.doc_loaded()
 
+        # error handling for internal server errors
+        if page.ele('tag:pre'):
+            if page.ele('tag:pre').text == 'Internal Server Error':
+                print('Internal Server Error. Skipping...\n')
+                if close_on_finish:
+                    page.quit()
+                return []
+
         post_container = page.ele('tag:shreddit-post').ele('@slot=text-body')
         post.content = '\n\n'.join([p.text for p in post_container.eles('tag:p')])
 
@@ -134,13 +143,15 @@ class RedditHarvester:
             comments = [ele for ele in page.eles('tag:shreddit-comment') if ele.attr('depth') == '0' and ele.attr('thingid')[3:] not in comment_ids]
             if len(comments) == 0:
                 continue
-            if comments[0] is None:
+            if comments[0].attr('score') is None:
                 break
             elif int(comments[0].attr('score')) < threshold:
                 done = True
             else:
                 print(f'{len(comments)} new comments found this cycle')
             for comment in comments:
+                if not comment.ele('@slot=comment'): # Skip comments removed my moderators
+                    continue
                 upvotes = comment.attr('score')
                 if upvotes is not None:
                     upvotes = int(comment.attr('score'))
@@ -155,8 +166,7 @@ class RedditHarvester:
                 depth = int(comment.attr('depth'))
                 author_id = comment.ele('tag:shreddit-comment-action-row').ele('tag:shreddit-overflow-menu').attr('author-id')
                 author_id = author_id[3:] if author_id is not None else 'deleted'
-                text = '\n\n'.join(
-                    [p.text for p in comment.ele('@slot=comment').eles('tag:p')])
+                text = '\n\n'.join([p.text for p in comment.ele('@slot=comment').eles('tag:p')])
                 comment_obj = Comment(parent, comment_id, depth, author_id, upvotes, text)
                 comment_objs.append(comment_obj)
             if total < len(comment_objs):
