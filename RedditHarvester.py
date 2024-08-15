@@ -21,6 +21,7 @@ class RedditHarvester:
         for file in os.listdir(data_dir):
             yield file.replace('.json', '')
 
+    # TODO: FIX GATHER POSTS METHODS TO GET HREF LINK WHEN GATHERING POST IDS
     def gather_n_posts(self, n: int = 50, close_on_finish: bool = True) -> list[Post]:
         url = f'https://www.reddit.com/r/{self.target}/top/?t={self.timeframe}'
         page = ChromiumPage()
@@ -44,7 +45,7 @@ class RedditHarvester:
                 if post_id in post_ids: # Prevent duplicates
                     continue
                 else:
-                    post_ids.append(post_id)
+                    post_ids.add(post_id)
                 comments = int(post.attr('comment-count'))
                 title = post.attr('post-title')
                 author_id = post.attr('author-id')
@@ -68,7 +69,7 @@ class RedditHarvester:
                 page.scroll.to_bottom()
                 page.wait(0.2)
 
-        if close_on_finish:
+        if close_on_finish or len(post_objs) == 0:
             page.quit()
         return post_objs
 
@@ -98,7 +99,7 @@ class RedditHarvester:
                 if post_id in post_ids: # Prevent duplicates
                     continue
                 else: 
-                    post_ids.append(post_id)
+                    post_ids.add(post_id)
                 comments = int(post.attr('comment-count'))
                 title = post.attr('post-title')
                 author_id = post.attr('author-id')
@@ -109,7 +110,7 @@ class RedditHarvester:
             if total < len(post_objs):
                 total = len(post_objs)
                 print(f'Gathered {total} posts so far\n')
-                print('Scrolling to bottom...') if not done else print('Done gathering posts\n')
+                print('Scrolling to bottom...') if not done else print(f'Done gathering {total} posts\n')
                 page.scroll.to_bottom()
                 page.wait(0.2)
             if done:
@@ -119,6 +120,7 @@ class RedditHarvester:
             page.quit()
         return post_objs
     
+    # TODO: CHANGE HARVEST COMMENTS METHODS TO USE POST.HREF INSTEAD OF HARDCODED URL STRING
     def harvest_threshold_comments(self, post: Post, threshold: int = 1000, close_on_finish: bool = True):
         url = f'https://www.reddit.com/r/{self.target}/comments/{post.id}/{post.title}/?sort=top'
         page = ChromiumPage()
