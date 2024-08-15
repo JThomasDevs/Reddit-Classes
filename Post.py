@@ -2,10 +2,11 @@ from .Comment import Comment
 import json
 
 class Post:
-    def __init__(self, host_reddit: str, upvote_count: int, comment_count: int, post_title: str, post_id: str, author_id: str, post_date: str):
+    def __init__(self, host_reddit: str, post_id: str, post_title: str, href: str, upvote_count: int, comment_count: int, author_id: str, post_date: str):
         self.host_reddit: str = host_reddit
         self.id: str = post_id
         self.title: str = post_title
+        self.href: str = href
         self.content: str = ''
         self.upvotes: int = upvote_count
         self.comments: int = comment_count
