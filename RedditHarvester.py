@@ -7,11 +7,19 @@ from .Comment import Comment
 class RedditHarvester:
     valid_timeframes = ['hour', 'day', 'week', 'month', 'year', 'all']
 
-    def __init__(self, target='popular', timeframe='day'):
+    def __init__(self, target='popular', timeframe='day', data_dir=os.path.join(os.getcwd(), 'data')):
         self.target = target
         if timeframe not in self.valid_timeframes:
             raise ValueError(f'Invalid timeframe: {timeframe}. Valid timeframes are: {self.valid_timeframes}')
         self.timeframe = timeframe
+        self.data_dir = data_dir
+
+    def _get_post_ids(self, dir=None):
+        if dir is None:
+            dir = self.data_dir
+        data_dir = os.path.join(os.getcwd(), dir, self.target)
+        for file in os.listdir(data_dir):
+            yield file.replace('.json', '')
 
     def gather_n_posts(self, n: int = 50, close_on_finish: bool = True) -> list[Post]:
         url = f'https://www.reddit.com/r/{self.target}/top/?t={self.timeframe}'
@@ -24,7 +32,7 @@ class RedditHarvester:
         page.wait.eles_loaded('tag:faceplate-batch') # Container for posts beyond the top 3-7
 
         post_objs = []
-        post_ids = [] #TODO: Write function to assemble post_id list from existing records
+        post_ids = set(self._get_post_ids())
         done = False
         print('Gathering posts...')
         total = 0
@@ -75,7 +83,7 @@ class RedditHarvester:
         page.wait.eles_loaded('tag:faceplate-batch') # Container for posts beyond the top 3-7
 
         post_objs = []
-        post_ids = []
+        post_ids = set(self._get_post_ids())
         done = False
         print('Gathering posts...')
         total = 0
@@ -153,7 +161,7 @@ class RedditHarvester:
                 if not comment.ele('@slot=comment'): # Skip comments removed my moderators
                     continue
                 upvotes = comment.attr('score')
-                if upvotes is not None:
+                if upvotes is not None: # Deleted comments' upvotes are None
                     upvotes = int(comment.attr('score'))
                 else:
                     continue
@@ -192,6 +200,8 @@ class RedditHarvester:
 
     def write_posts(self, posts: list[Post], path: str = '.'):
         for post in posts:
+            if post.content == '' or post.top_comments == []:
+                continue
             post_id = post.id
             parent = post.host_reddit
             post = post.to_json()
