@@ -46,6 +46,7 @@ class RedditHarvester:
                     continue
                 else:
                     post_ids.add(post_id)
+                href = post.ele('@slot=full-post-link').attr('href')
                 comments = int(post.attr('comment-count'))
                 title = post.attr('post-title')
                 author_id = post.attr('author-id')
@@ -54,7 +55,7 @@ class RedditHarvester:
                 else:
                     author_id = 'deleted'
                 date = post.attr('created-timestamp')[:10]
-                post_obj = Post(self.target, upvotes, comments, title, post_id, author_id, date)
+                post_obj = Post(self.target, post_id, title, href, upvotes, comments, author_id, date)
                 if len(post_objs) == n:
                     done = True
                 else:
@@ -100,12 +101,13 @@ class RedditHarvester:
                     continue
                 else: 
                     post_ids.add(post_id)
+                href = post.ele('@slot=full-post-link').attr('href')
                 comments = int(post.attr('comment-count'))
                 title = post.attr('post-title')
                 author_id = post.attr('author-id')
                 author_id = author_id[3:] if author_id is not None else 'deleted'
                 date = post.attr('created-timestamp')[:10]
-                post_obj = Post(self.target, upvotes, comments, title, post_id, author_id, date)
+                post_obj = Post(self.target, post_id, title, href, upvotes, comments, author_id, date)
                 post_objs.append(post_obj)
             if total < len(post_objs):
                 total = len(post_objs)
@@ -122,7 +124,7 @@ class RedditHarvester:
     
     # TODO: CHANGE HARVEST COMMENTS METHODS TO USE POST.HREF INSTEAD OF HARDCODED URL STRING
     def harvest_threshold_comments(self, post: Post, threshold: int = 1000, close_on_finish: bool = True):
-        url = f'https://www.reddit.com/r/{self.target}/comments/{post.id}/{post.title}/?sort=top'
+        url = f'https://www.reddit.com/{post.href}/?sort=top'
         page = ChromiumPage()
         page.set.window.mini()
         page.get(url)
