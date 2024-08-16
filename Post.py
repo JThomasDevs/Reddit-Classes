@@ -1,4 +1,4 @@
-from .Comment import Comment
+from reddit_classes.Comment import Comment
 import json
 
 class Post:

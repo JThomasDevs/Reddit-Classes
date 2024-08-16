@@ -1,8 +1,8 @@
 import os
 from DrissionPage import ChromiumPage
-from DrissionPage.errors import ElementLostError, ElementNotFoundError, NoRectError
-from .Post import Post
-from .Comment import Comment
+from DrissionPage.errors import ElementNotFoundError
+from reddit_classes.Post import Post
+from reddit_classes.Comment import Comment
 
 class RedditHarvester:
     valid_timeframes = ['hour', 'day', 'week', 'month', 'year', 'all']
@@ -45,7 +45,7 @@ class RedditHarvester:
                     continue
                 else:
                     post_ids.add(post_id)
-                href = post.ele('@slot=full-post-link').attr('href')
+                href = post.attr('content-href')
                 comments = int(post.attr('comment-count'))
                 title = post.attr('post-title')
                 author_id = post.attr('author-id')
@@ -100,7 +100,7 @@ class RedditHarvester:
                     continue
                 else: 
                     post_ids.add(post_id)
-                href = post.ele('@slot=full-post-link').attr('href')
+                href = post.attr('content-href')
                 comments = int(post.attr('comment-count'))
                 title = post.attr('post-title')
                 author_id = post.attr('author-id')
@@ -108,7 +108,7 @@ class RedditHarvester:
                 date = post.attr('created-timestamp')[:10]
                 post_obj = Post(self.target, post_id, title, href, upvotes, comments, author_id, date)
                 post_objs.append(post_obj)
-            if total < len(post_objs):
+            if total <= len(post_objs):
                 total = len(post_objs)
                 print(f'Gathered {total} posts so far\n')
                 print('Scrolling to bottom...') if not done else print(f'Done gathering {total} posts\n')
@@ -177,7 +177,7 @@ class RedditHarvester:
                 print('\nDone harvesting comments')
                 print(f'Harvested {total} comments above {threshold} upvotes for post: {post.id}\n')
                 continue
-            if total < len(comment_objs):
+            if total <= len(comment_objs):
                 total = len(comment_objs)
                 print(f'\nHarvested {total} comments so far')
                 try:
