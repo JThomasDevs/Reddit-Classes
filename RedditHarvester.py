@@ -100,7 +100,7 @@ class RedditHarvester:
                     continue
                 else: 
                     post_ids.add(post_id)
-                href = post.ele('@slot=full-post-link').attr('href').replace('https', 'https:')
+                href = post.ele('@slot=full-post-link').attr('href')
                 comments = int(post.attr('comment-count'))
                 title = post.attr('post-title')
                 author_id = post.attr('author-id')
