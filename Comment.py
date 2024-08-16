@@ -13,11 +13,31 @@ class Comment:
                f'{self.text}'
     
     def to_dict(self):
+        unicode_replacements = {
+            "\u2018": "'",
+            "\u2019": "'",
+            "\u201c": '"',
+            "\u201d": '"',
+            "\u2013": "-",
+            "\u2014": "-",
+            "\u2026": "...",
+            "\u00A0": " ",
+            "\u00AD": "-",
+            "\u2122": "(TM)",
+            "\u00AE": "(R)",
+            "\u00B0": "°"
+        }
+
+        def replace_unicode_symbols(text):
+            for unicode_char, replacement in unicode_replacements.items():
+                text = text.replace(unicode_char, replacement)
+            return text
+        
         return {
             'parent_post': self.parent_post,
             'id': self.id,
             'depth': self.depth,
             'author_id': self.author_id,
             'upvotes': self.upvotes,
-            'text': self.text.replace("\u2019", "'")
+            'text': replace_unicode_symbols(self.text)
         }

@@ -145,11 +145,9 @@ class RedditHarvester:
         comments = []
         while not done:
             comments.clear()
-            comments = [ele for ele in page.eles('tag:shreddit-comment') if ele.attr('depth') == '0' and ele.attr('thingid')[3:] not in comment_ids]
+            comments = [ele for ele in page.eles('tag:shreddit-comment') if ele.attr('depth') == '0' and ele.attr('thingid')[3:] not in comment_ids and ele.attr('score') is not None]
             if len(comments) == 0:
                 continue
-            if comments[0].attr('score') is None:
-                break
             elif int(comments[0].attr('score')) < threshold:
                 done = True
             else:
