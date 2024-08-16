@@ -21,7 +21,6 @@ class RedditHarvester:
         for file in os.listdir(data_dir):
             yield file.replace('.json', '')
 
-    # TODO: FIX GATHER POSTS METHODS TO GET HREF LINK WHEN GATHERING POST IDS
     def gather_n_posts(self, n: int = 50, close_on_finish: bool = True) -> list[Post]:
         url = f'https://www.reddit.com/r/{self.target}/top/?t={self.timeframe}'
         page = ChromiumPage()
@@ -122,9 +121,8 @@ class RedditHarvester:
             page.quit()
         return post_objs
     
-    # TODO: CHANGE HARVEST COMMENTS METHODS TO USE POST.HREF INSTEAD OF HARDCODED URL STRING
     def harvest_threshold_comments(self, post: Post, threshold: int = 1000, close_on_finish: bool = True):
-        url = f'https://www.reddit.com/{post.href}/?sort=top'
+        url = f'https://www.reddit.com{post.href}?sort=top'
         page = ChromiumPage()
         page.set.window.mini()
         page.get(url)
