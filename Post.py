@@ -23,6 +23,7 @@ class Post:
             'host_reddit': self.host_reddit,
             'id': self.id,
             'title': self.title,
+            'href': self.href,
             'content': self.content.replace("\u2019", "'"),
             'upvotes': self.upvotes,
             'comments': self.comments,

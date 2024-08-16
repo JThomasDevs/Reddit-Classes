@@ -117,6 +117,9 @@ class RedditHarvester:
             if done:
                 continue
 
+        if len(post_objs) == 0:
+            print('No unique posts found above the threshold')
+            page.quit()
         if close_on_finish:
             page.quit()
         return post_objs
@@ -184,14 +187,6 @@ class RedditHarvester:
                     page.scroll.to_bottom()
                     if page.ele('@noun=load_more_comments'):
                         page.ele('@noun=load_more_comments').click()
-                try:
-                    page.ele('@noun=load_more_comments').click() # load more comments
-                except ElementLostError:
-                    print('Element lost error')
-                    break
-                except NoRectError:
-                    print('No rect error')
-                    break
         if close_on_finish:
             page.quit()
         post.top_comments = comment_objs
@@ -202,6 +197,7 @@ class RedditHarvester:
             if post.content == '' or post.top_comments == []:
                 continue
             post_id = post.id
+            href = post.href
             parent = post.host_reddit
             post = post.to_json()
             directory = f'{path}/{parent}'
