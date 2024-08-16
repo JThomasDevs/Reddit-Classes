@@ -100,7 +100,7 @@ class RedditHarvester:
                     continue
                 else: 
                     post_ids.add(post_id)
-                href = post.ele('@slot=full-post-link').attr('href')
+                href = post.ele('@slot=full-post-link').attr('href').replace('https', 'https:')
                 comments = int(post.attr('comment-count'))
                 title = post.attr('post-title')
                 author_id = post.attr('author-id')
@@ -122,19 +122,11 @@ class RedditHarvester:
         return post_objs
     
     def harvest_threshold_comments(self, post: Post, threshold: int = 1000, close_on_finish: bool = True):
-        url = f'https://www.reddit.com{post.href}?sort=top'
+        url = f'{post.href}?sort=top'
         page = ChromiumPage()
         page.set.window.mini()
         page.get(url)
         page.wait.doc_loaded()
-
-        # error handling for internal server errors
-        if page.ele('tag:pre'):
-            if page.ele('tag:pre').text == 'Internal Server Error':
-                print('Internal Server Error. Skipping...\n')
-                if close_on_finish:
-                    page.quit()
-                return []
 
         post_container = page.ele('tag:shreddit-post').ele('@slot=text-body')
         post.content = '\n\n'.join([p.text for p in post_container.eles('tag:p')])
