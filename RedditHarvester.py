@@ -1,6 +1,6 @@
 import os
 from DrissionPage import ChromiumPage
-from DrissionPage.errors import ElementLostError, NoRectError
+from DrissionPage.errors import ElementLostError, ElementNotFoundError, NoRectError
 from .Post import Post
 from .Comment import Comment
 
@@ -171,10 +171,19 @@ class RedditHarvester:
                 text = '\n\n'.join([p.text for p in comment.ele('@slot=comment').eles('tag:p')])
                 comment_obj = Comment(parent, comment_id, depth, author_id, upvotes, text)
                 comment_objs.append(comment_obj)
+            if done:
+                print('\nDone harvesting comments')
+                print(f'Harvested {total} comments above {threshold} upvotes for post: {post.id}\n')
+                continue
             if total < len(comment_objs):
                 total = len(comment_objs)
                 print(f'\nHarvested {total} comments so far')
-                page.scroll.to_see(page.ele('@noun=load_more_comments'))
+                try:
+                    page.scroll.to_see(page.ele('@noun=load_more_comments'))
+                except ElementNotFoundError:
+                    page.scroll.to_bottom()
+                    if page.ele('@noun=load_more_comments'):
+                        page.ele('@noun=load_more_comments').click()
                 try:
                     page.ele('@noun=load_more_comments').click() # load more comments
                 except ElementLostError:
@@ -183,10 +192,6 @@ class RedditHarvester:
                 except NoRectError:
                     print('No rect error')
                     break
-            if done:
-                print('\nDone harvesting comments')
-                print(f'Harvested {total} comments above {threshold} upvotes for post: {post.id}\n')
-                continue
         if close_on_finish:
             page.quit()
         post.top_comments = comment_objs
