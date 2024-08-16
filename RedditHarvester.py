@@ -175,6 +175,7 @@ class RedditHarvester:
                 comment_obj = Comment(parent, comment_id, depth, author_id, upvotes, text)
                 comment_objs.append(comment_obj)
             if done:
+                total = len(comment_objs)
                 print('\nDone harvesting comments')
                 print(f'Harvested {total} comments above {threshold} upvotes for post: {post.id}\n')
                 continue

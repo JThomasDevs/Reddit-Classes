@@ -22,7 +22,7 @@ class Post:
         return {
             'host_reddit': self.host_reddit,
             'id': self.id,
-            'title': self.title,
+            'title': self.title.replace("\u2019", "'"),
             'href': self.href,
             'content': self.content.replace("\u2019", "'"),
             'upvotes': self.upvotes,
@@ -33,4 +33,4 @@ class Post:
         }
     
     def to_json(self):
-        return json.dumps(self.to_dict(), indent=4, ensure_ascii=False)
+        return json.dumps(self.to_dict(), indent=4)
