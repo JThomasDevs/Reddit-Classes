@@ -182,9 +182,9 @@ class RedditHarvester:
             if total < len(comment_objs):
                 total = len(comment_objs)
                 print(f'\nHarvested {total} comments so far')
-                page.scroll.to_see(page.ele('xpath:/html/body/shreddit-app/div/div[1]/div/main/div/faceplate-batch/shreddit-comment-tree/faceplate-partial'))
+                page.scroll.to_see(page.ele('@noun=load_more_comments'))
                 try:
-                    page.ele('xpath:/html/body/shreddit-app/div/div[1]/div/main/div/faceplate-batch/shreddit-comment-tree/faceplate-partial').click() # load more comments
+                    page.ele('@noun=load_more_comments').click() # load more comments
                 except ElementLostError:
                     print('Element lost error')
                     break
